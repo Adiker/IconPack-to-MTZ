@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a reproducible problem without uploading copyrighted APKs or icons.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach third-party APKs, converted icons, private URI values, or
+        malicious archives. Security issues belong in a private advisory.
+
+  - type: input
+    id: version
+    attributes:
+      label: App revision
+      description: Release version or commit SHA.
+      placeholder: 0.1.0 or abc1234
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Android and device
+      description: Include Android, MIUI/HyperOS, Themes app, and region when relevant.
+      placeholder: Android 16, HyperOS 3, Themes x.y, Poland
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Failing stage
+      options:
+        - APK selection
+        - APK analysis
+        - Resource rendering
+        - MTZ generation
+        - Report export
+        - Xiaomi Themes or zFont import
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened and what did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide minimal steps using synthetic data where possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: report
+    attributes:
+      label: Redacted report details
+      description: Paste relevant issue codes and counters, without private paths or URI values.
+      render: text
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I removed private data and did not attach copyrighted icon-pack contents.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

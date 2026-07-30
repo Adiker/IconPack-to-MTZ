@@ -1,0 +1,36 @@
+name: Feature request
+description: Propose a focused improvement to conversion, compatibility, or UX.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem or compatibility gap should be solved?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the expected result and any relevant MTZ or Android constraints.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: The proposal keeps conversion fully local.
+          required: true
+        - label: The proposal does not require distributing third-party icon-pack content.
+          required: true

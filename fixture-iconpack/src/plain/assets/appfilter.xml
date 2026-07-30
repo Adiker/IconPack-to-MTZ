@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item component="ComponentInfo{com.example.one/com.example.one.MainActivity}" drawable="fixture_blue" />
+    <item component="ComponentInfo{com.example.same/.FirstActivity}" drawable="fixture_green" />
+    <item component="ComponentInfo{com.example.same/.SecondActivity}" drawable="fixture_green" />
+    <item component="ComponentInfo{com.example.multi/MainActivity}" drawable="fixture_blue" />
+    <item component="ComponentInfo{com.example.multi/.SecondActivity}" drawable="fixture_svg" />
+    <item component="ComponentInfo{com.example.multi/.ThirdActivity}" drawable="fixture_adaptive" />
+    <item component="ComponentInfo{com.example.raster/.MainActivity}" drawable="fixture_raster" />
+</resources>

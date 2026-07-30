@@ -1,0 +1,3 @@
+-keep class com.reandroid.arsc.** { *; }
+-keep class com.caverock.androidsvg.** { *; }
+-keepattributes *Annotation*
