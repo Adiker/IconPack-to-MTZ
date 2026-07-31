@@ -13,12 +13,14 @@ a synthetic base theme.
 | Managed Android emulator API 37 | Passed |
 | Synthetic standalone MTZ | Passed |
 | Synthetic base-theme MTZ | Passed |
-| Physical Xiaomi with MIUI | Not tested |
-| Physical Xiaomi with HyperOS | Not tested |
+| Physical POCO F8 Ultra with HyperOS | MTZ import tested successfully |
+| Other physical Xiaomi devices with MIUI/HyperOS | Not tested |
 | zFont import | Not tested |
 
-Automated structural tests do not prove that a regional Xiaomi Themes build
-will accept a locally imported MTZ.
+Automated structural tests do not prove that every regional Xiaomi Themes
+build will accept a locally imported MTZ. The successful POCO F8 Ultra test is
+device-specific and does not establish compatibility for every HyperOS device,
+region, or Themes version.
 
 ## Icon-pack input
 
