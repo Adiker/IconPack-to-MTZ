@@ -5,60 +5,59 @@
 [![License: Apache-2.0](https://img.shields.io/github/license/Adiker/IconPack-to-MTZ)](LICENSE)
 [![Android 11+](https://img.shields.io/badge/Android-11%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com/about/versions/11)
 
-**Polski** · [English](docs/README.en.md)
+[Polski](docs/README.pl.md) · **English**
 
-Lokalna aplikacja Android konwertująca paczki ikon APK — w tym Arcticons — do
-modułu ikon motywu MIUI/HyperOS w pliku `.mtz`.
+IconPack to HyperOS MTZ is a local Android application that converts standard
+Android icon-pack APKs, including Arcticons, into MIUI/HyperOS `.mtz` icon
+themes.
 
 > [!IMPORTANT]
-> Projekt waliduje strukturę MTZ na fixture i emulatorach, ale import w
-> aplikacji Motywy Xiaomi lub zFont na fizycznym urządzeniu HyperOS nie został
-> jeszcze potwierdzony. Szczegóły zawiera
-> [macierz zgodności](docs/COMPATIBILITY.md).
+> The archive structure is covered by automated fixtures and emulator tests.
+> Import has been tested successfully on a physical POCO F8 Ultra. See the
+> [compatibility notes](docs/COMPATIBILITY.md) for the current validation
+> matrix and remaining limitations.
 
-## Najważniejsze możliwości
+## Features
 
-- analizowanie APK bez instalowania i bez wysyłania danych do sieci;
-- tekstowe i skompilowane `appfilter.xml`;
-- VectorDrawable, adaptive icons, PNG, WebP, JPEG i SVG;
-- trzy strategie nazw: zoptymalizowana, pełna i tylko pakietowa;
-- renderowanie każdego unikalnego zasobu raz oraz dyskowy cache LRU;
-- samodzielny MTZ albo zachowanie bazowego motywu z podmianą tylko `icons`;
-- raport JSON i tekstowy po sukcesie, błędzie lub anulowaniu;
-- lokalna historia konwersji w Room;
-- opcjonalne Shizuku wyłącznie do odczytu pełniejszej listy pakietów;
-- polski i angielski interfejs.
+- Reads text and compiled `appfilter.xml` without installing the source APK.
+- Supports VectorDrawable, adaptive icons, PNG, WebP, JPEG, and asset SVGs.
+- Renders every unique source once and reuses a bounded disk LRU cache.
+- Provides optimized, full-compatibility, and package-only naming strategies.
+- Creates a standalone MTZ or replaces only `icons` in a working base theme.
+- Produces versioned JSON and human-readable text reports.
+- Runs long conversions in a cancellable foreground service.
+- Stores conversion history locally with Room.
+- Can optionally use Shizuku for a more complete installed-package list.
+- Provides Polish and English UI.
 
-Aplikacja nie deklaruje uprawnień `INTERNET` ani `QUERY_ALL_PACKAGES`.
+The application declares neither `INTERNET` nor `QUERY_ALL_PACKAGES`.
 
-## Jak działa
+## How it works
 
 ```mermaid
 flowchart LR
-    APK["APK paczki ikon"] --> VALIDATE["Walidacja archiwum"]
+    APK["Icon-pack APK"] --> VALIDATE["Archive validation"]
     VALIDATE --> FILTER["appfilter.xml"]
-    FILTER --> RESOURCES["Wyszukanie zasobów"]
-    RESOURCES --> RENDER["Renderowanie i cache"]
-    RENDER --> ICONS["Moduł icons"]
-    BASE["Opcjonalny bazowy MTZ"] --> MTZ["Budowa MTZ"]
+    FILTER --> RESOURCES["Resource lookup"]
+    RESOURCES --> RENDER["Rendering and cache"]
+    RENDER --> ICONS["icons module"]
+    BASE["Optional base MTZ"] --> MTZ["MTZ construction"]
     ICONS --> MTZ
-    MTZ --> OUTPUT["MTZ + raporty"]
+    MTZ --> OUTPUT["MTZ + reports"]
 ```
 
-Pełny opis granic modułów, przepływu danych i zabezpieczeń znajduje się w
-[dokumentacji architektury](docs/ARCHITECTURE.md).
+See the [architecture documentation](docs/ARCHITECTURE.md) for module
+boundaries, data flow, and security constraints.
 
-## Wymagania
+## Requirements
 
-- Android Studio zgodne z Android Gradle Plugin 9.3;
-- Android SDK Platform 37 i Build Tools 37.0.0;
-- pełny JDK 17 lub nowszy;
-- JDK 21 do testów Robolectric obejmujących API 37;
-- urządzenie z Androidem 11 (API 30) lub nowszym.
+- Android Studio compatible with Android Gradle Plugin 9.3;
+- Android SDK Platform 37 and Build Tools 37.0.0;
+- a full JDK 17 or newer;
+- JDK 21 for Robolectric tests that cover API 37;
+- Android 11 (API 30) or newer at runtime.
 
-Projekt używa `compileSdk/targetSdk 37` oraz `minSdk 30`.
-
-## Budowanie
+## Build
 
 ```bash
 git clone https://github.com/Adiker/IconPack-to-MTZ.git
@@ -66,13 +65,7 @@ cd IconPack-to-MTZ
 ./gradlew assembleDebug
 ```
 
-Debug APK powstaje w:
-
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
-
-Pełna lokalna walidacja:
+For a memory-conservative full validation, run each task separately:
 
 ```bash
 ./gradlew --no-daemon --max-workers=1 test
@@ -81,44 +74,35 @@ Pełna lokalna walidacja:
 ./gradlew --no-daemon --max-workers=1 bundleRelease
 ```
 
-Projekt domyślnie ogranicza Gradle do dwóch workerów i wyłącza równoległe
-wykonywanie. Uruchamianie ciężkich zadań osobno dodatkowo zmniejsza szczytowe
-zużycie RAM-u.
-
-Testy zarządzanych emulatorów:
+Managed-device smoke tests:
 
 ```bash
 ./gradlew --no-daemon --max-workers=1 pixel2Api30DebugAndroidTest
 ./gradlew --no-daemon --max-workers=1 pixel2Api37DebugAndroidTest
 ```
 
-Gradle pobierze obrazy `google_apis;x86_64`, jeżeli nie są zainstalowane.
-Emulatory wymagają sprzętowej wirtualizacji do rozsądnej wydajności.
+`bundleRelease` creates an unsigned AAB. Signing credentials are deliberately
+not stored in the repository.
 
-`bundleRelease` tworzy niesygnowany AAB. Repozytorium celowo nie zawiera klucza
-ani haseł; przed dystrybucją należy podpisać bundle własnym kluczem w Android
-Studio albo użyć bezpiecznego magazynu poświadczeń CI.
+## Usage
 
-## Użycie
+1. Select an icon-pack APK through Android's document picker.
+2. Optionally select a known-working base MTZ.
+3. Choose an output directory, conversion mode, and naming strategy.
+4. Analyze the APK. Up to 64 representative icons are rendered into the cache
+   to estimate output size.
+5. Start generation. The foreground service keeps working outside the UI and
+   exposes cancellation.
 
-1. Wybierz APK paczki ikon przez systemowy selektor dokumentów.
-2. Opcjonalnie wskaż działający bazowy `.mtz`.
-3. Wybierz katalog docelowy, tryb konwersji i strategię nazw.
-4. Uruchom analizę. Maksymalnie 64 reprezentatywne ikony zostaną wyrenderowane
-   do cache, aby oszacować rozmiar wyniku.
-5. Uruchom generowanie. Foreground Service kontynuuje pracę po opuszczeniu UI
-   i pozwala anulować operację.
+Full mode always converts the entire appfilter and needs neither root nor
+Shizuku. Enabling Shizuku after its service has started requests permission and
+the app refreshes its state when permission is granted or Shizuku restarts.
+Installed-apps mode is an optional optimization and can be incomplete
+because of Android package-visibility filtering.
 
-Tryb pełny zawsze przetwarza całe `appfilter.xml`. Tryb „tylko zainstalowane”
-korzysta najpierw z aktywności widocznych dla `PackageManager`; wynik może być
-niepełny z powodu ograniczeń widoczności pakietów Androida. Shizuku jest
-opcjonalnym, świadomie włączanym rozszerzeniem. Po uruchomieniu usługi Shizuku
-włączenie tej opcji wyświetla prośbę o uprawnienie; aplikacja automatycznie
-odświeża stan po przyznaniu uprawnienia lub ponownym uruchomieniu Shizuku.
+## Output format
 
-## Format wyniku
-
-Samodzielny MTZ:
+Standalone MTZ output:
 
 ```text
 description.xml
@@ -126,75 +110,79 @@ icons
 preview/preview_icons_0.jpg
 ```
 
-`icons` jest wewnętrznym ZIP-em bez rozszerzenia:
+`icons` is an extensionless inner ZIP:
 
 ```text
 res/drawable-xxhdpi/com.example.app.png
 res/drawable-xxhdpi/com.example.app.MainActivity.png
 ```
 
-W wariancie bazowym oryginalne wpisy są zachowywane, z wyjątkiem dokładnego
-głównego wpisu `icons`, który zostaje zastąpiony.
+In base-theme mode, original entries are preserved except for the exact root
+`icons` entry, which is replaced.
 
-## Bezpieczeństwo i prywatność
+## Security and privacy
 
-APK i MTZ są traktowane jako niezaufane archiwa. Pipeline ogranicza liczbę i
-rozmiar wpisów, współczynnik kompresji, rozmiary XML i bitmap oraz liczbę
-plików wynikowych. Parsery blokują DOCTYPE i encje zewnętrzne, a nazwy plików
-są chronione przed Zip Slip i path traversal.
+APK and MTZ inputs are untrusted. The pipeline enforces limits for archive
+entries, expanded bytes, compression ratio, XML depth, source bitmap size, and
+output aliases. It blocks external XML entities, Zip Slip, path traversal, and
+unsafe output names.
 
-Pliki robocze pozostają w prywatnym cache aplikacji i są usuwane po zakończeniu
-lub anulowaniu. Historia nie przechowuje kopii APK. Eksportowane raporty nie
-zawierają pełnych prywatnych URI ani ścieżek.
+All processing is local. Operational copies live only in the application's
+private cache and are removed after completion or cancellation. Exported
+reports redact private paths and URI values.
 
-Podejrzenie podatności należy zgłosić zgodnie z
-[polityką bezpieczeństwa](SECURITY.md), nie w publicznym issue.
+Please report suspected vulnerabilities according to
+[SECURITY.md](SECURITY.md), not in a public issue.
 
-## Stan walidacji
+## Validation status
 
-| Sprawdzenie | Wynik |
+| Check | Result |
 | --- | --- |
-| Testy JVM/Robolectric | 34 testy, API 30 i 37, bez błędów |
-| Android Lint | 0 błędów |
-| Debug APK | zbudowany |
-| Release AAB | zbudowany, niesygnowany |
-| Emulator API 30 | test platformowy zaliczony |
-| Emulator API 37 | test platformowy zaliczony |
-| Fizyczne Xiaomi/HyperOS | jeszcze niezweryfikowane |
+| JVM/Robolectric tests | 34 tests, API 30 and 37, passed |
+| Android Lint | 0 errors |
+| Debug APK | Built |
+| Release AAB | Built, unsigned |
+| Emulator API 30 | Instrumented test passed |
+| Emulator API 37 | Instrumented test passed |
+| Physical POCO F8 Ultra | MTZ import tested successfully |
 
-Fixture APK zawiera wyłącznie autorskie geometryczne zasoby CC0. Repozytorium
-nie zawiera ikon Arcticons ani innych zewnętrznych paczek.
+The fixture APK contains only original CC0 geometric assets. The repository
+does not contain Arcticons or other third-party icon packs.
 
-## Struktura repozytorium
+## Repository structure
 
-| Moduł | Odpowiedzialność |
+| Module | Responsibility |
 | --- | --- |
-| `app` | Compose UI, SAF, Hilt i Foreground Service |
-| `core-model` | kontrakty, modele, limity i planowanie nazw |
-| `core-archive` | walidacja ZIP, bezpieczne ścieżki i hashing |
-| `core-apk` | appfilter, ARSCLib i izolowane Android Resources |
-| `core-renderer` | renderowanie drawable, SVG i cache |
-| `core-mtz` | metadata, preview, moduł `icons` i zewnętrzny MTZ |
-| `core-report` | wersjonowane raporty JSON/TXT |
-| `core-data` | historia Room |
-| `feature-converter` | współbieżny i anulowalny pipeline |
-| `feature-settings` | ustawienia DataStore |
-| `feature-history` | granica funkcji historii |
-| `integration-shizuku` | opcjonalna integracja tylko do odczytu |
-| `fixture-iconpack` | syntetyczny fixture APK CC0 |
+| `app` | Compose UI, SAF, Hilt, and foreground service |
+| `core-model` | Contracts, models, limits, and naming planning |
+| `core-archive` | ZIP validation, safe paths, and hashing |
+| `core-apk` | appfilter, ARSCLib, and isolated Android resources |
+| `core-renderer` | Drawable, SVG, and cached rendering |
+| `core-mtz` | Metadata, preview, `icons`, and outer MTZ |
+| `core-report` | Versioned JSON/TXT reports |
+| `core-data` | Room history |
+| `feature-converter` | Concurrent, cancellable pipeline |
+| `feature-settings` | DataStore settings |
+| `feature-history` | History feature boundary |
+| `integration-shizuku` | Optional read-only integration |
+| `fixture-iconpack` | Synthetic CC0 fixture APK |
 
-## Współpraca
+## Contributing
 
-Zobacz [CONTRIBUTING.md](CONTRIBUTING.md). Zmiany powinny mieć testy
-odpowiednie do zakresu, nie mogą dodawać materiałów z cudzych paczek ikon i
-powinny zachować całkowicie lokalny model przetwarzania.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Changes should include appropriate
+tests, must not add material from third-party icon packs, and should preserve
+the fully local processing model.
 
-## Licencja
+## Documentation
 
-Kod projektu jest dostępny na licencji
-[Apache License 2.0](LICENSE). Główne zależności opisuje
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- [Architecture](docs/ARCHITECTURE.md)
+- [Compatibility and limitations](docs/COMPATIBILITY.md)
+- [Contributing](CONTRIBUTING.md)
+- [Third-party notices](THIRD_PARTY_NOTICES.md)
 
-Licencja aplikacji nie nadaje praw do ikon z wybranego APK. Użytkownik
-odpowiada za posiadanie prawa do konwersji, użycia i dystrybucji paczki ikon
-oraz wynikowego motywu.
+## License
+
+Project code is licensed under the [Apache License 2.0](LICENSE). The
+repository contains no third-party icon packs. Users remain responsible for
+the rights required to convert, use, or redistribute icons from a selected
+APK.
