@@ -5,7 +5,10 @@ plugins {
 android {
     namespace = "io.github.adiker.iconpacktomtz.integration.shizuku"
     compileSdk = 37
-    defaultConfig { minSdk = 30 }
+    defaultConfig {
+        minSdk = 30
+        consumerProguardFiles("consumer-rules.pro")
+    }
     buildFeatures { aidl = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

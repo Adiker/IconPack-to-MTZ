@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.hilt.android)
+    implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
     ksp(libs.hilt.compiler)
 

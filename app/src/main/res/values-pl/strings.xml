@@ -16,7 +16,7 @@
     <string name="full_mode_hint">Przetwarza każdy poprawny wpis appfilter. Nie wymaga roota ani Shizuku.</string>
     <string name="installed_mode_hint">Widoczność pakietów Androida może sprawić, że wynik będzie niepełny.</string>
     <string name="use_shizuku">Użyj Shizuku do pełnej listy pakietów</string>
-    <string name="shizuku_unavailable">Shizuku jest niedostępne albo nie przyznano uprawnienia.</string>
+    <string name="shizuku_unavailable">Shizuku jest niedostępne. Uruchom jego usługę i wróć do aplikacji.</string>
     <string name="naming_strategy">Nazewnictwo ikon</string>
     <string name="naming_optimized">Zoptymalizowane</string>
     <string name="naming_full">Pełna zgodność</string>

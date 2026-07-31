@@ -2,6 +2,7 @@ package io.github.adiker.iconpacktomtz
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
@@ -74,6 +75,11 @@ data class ConverterFormState(
     val analysisError: String? = null,
 )
 
+data class ShizukuState(
+    val available: Boolean = false,
+    val permissionGranted: Boolean = false,
+)
+
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -89,6 +95,8 @@ class ConverterViewModel @Inject constructor(
 ) : ViewModel() {
     private val mutableForm = MutableStateFlow(ConverterFormState())
     val form: StateFlow<ConverterFormState> = mutableForm.asStateFlow()
+    private val mutableShizukuState = MutableStateFlow(ShizukuState())
+    val shizukuState: StateFlow<ShizukuState> = mutableShizukuState.asStateFlow()
     val session: StateFlow<ConversionSessionState> = sessionStore.state
     val history: StateFlow<List<ConversionHistoryEntity>> =
         historyRepository.observeRecent().stateIn(
@@ -117,6 +125,7 @@ class ConverterViewModel @Inject constructor(
                 description = persisted.metadata.description,
             )
         }
+        refreshShizukuState()
     }
 
     fun selectApk(uri: Uri) {
@@ -157,24 +166,44 @@ class ConverterViewModel @Inject constructor(
     fun updateAuthor(value: String) = update { copy(author = value.take(100)) }
     fun updateDescription(value: String) = update { copy(description = value.take(500)) }
     fun updateUseShizuku(value: Boolean) {
-        if (value && !shizukuInstalledAppsProvider.hasPermission) {
+        if (!value) {
+            update { copy(useShizuku = false) }
+            return
+        }
+
+        refreshShizukuState()
+        if (!mutableShizukuState.value.available) return
+        if (mutableShizukuState.value.permissionGranted) {
+            update { copy(useShizuku = true) }
+        } else {
             shizukuInstalledAppsProvider.requestPermission(
                 ShizukuInstalledAppsProvider.PERMISSION_REQUEST_CODE,
             )
         }
-        update { copy(useShizuku = value) }
     }
     fun updateAdvancedLimits(value: Boolean) = update { copy(advancedLimits = value) }
     fun updateCacheLimitMiB(value: Int) =
         update { copy(cacheLimitMiB = value.coerceIn(32, 2_048)) }
 
-    fun refreshShizukuPermission() {
-        if (mutableForm.value.useShizuku && !shizukuInstalledAppsProvider.hasPermission) {
+    fun refreshShizukuState() {
+        val available = shizukuInstalledAppsProvider.isAvailable
+        val permissionGranted = available && shizukuInstalledAppsProvider.hasPermission
+        mutableShizukuState.value = ShizukuState(available, permissionGranted)
+        if (mutableForm.value.useShizuku && !permissionGranted) {
             update { copy(useShizuku = false) }
         }
     }
 
-    fun isShizukuAvailable(): Boolean = shizukuInstalledAppsProvider.isAvailable
+    fun onShizukuPermissionResult(requestCode: Int, grantResult: Int) {
+        if (requestCode != ShizukuInstalledAppsProvider.PERMISSION_REQUEST_CODE) return
+        refreshShizukuState()
+        update {
+            copy(
+                useShizuku = grantResult == PackageManager.PERMISSION_GRANTED &&
+                    mutableShizukuState.value.permissionGranted,
+            )
+        }
+    }
 
     fun analyze() {
         val state = mutableForm.value
