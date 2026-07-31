@@ -72,7 +72,9 @@ not stored in the repository.
    exposes cancellation.
 
 Full mode always converts the entire appfilter and needs neither root nor
-Shizuku. Installed-apps mode is an optional optimization and can be incomplete
+Shizuku. Enabling Shizuku after its service has started requests permission and
+the app refreshes its state when permission is granted or Shizuku restarts.
+Installed-apps mode is an optional optimization and can be incomplete
 because of Android package-visibility filtering.
 
 ## Security and privacy

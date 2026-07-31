@@ -75,15 +75,27 @@ import io.github.adiker.iconpacktomtz.core.model.ConversionMode
 import io.github.adiker.iconpacktomtz.core.model.IconPackAnalysis
 import io.github.adiker.iconpacktomtz.core.model.IssueSeverity
 import io.github.adiker.iconpacktomtz.core.model.NamingStrategy
+import rikka.shizuku.Shizuku
 import java.util.Locale
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: ConverterViewModel by viewModels()
+    private val shizukuBinderReceivedListener =
+        Shizuku.OnBinderReceivedListener { viewModel.refreshShizukuState() }
+    private val shizukuBinderDeadListener =
+        Shizuku.OnBinderDeadListener { viewModel.refreshShizukuState() }
+    private val shizukuPermissionResultListener =
+        Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
+            viewModel.onShizukuPermissionResult(requestCode, grantResult)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Shizuku.addBinderReceivedListenerSticky(shizukuBinderReceivedListener)
+        Shizuku.addBinderDeadListener(shizukuBinderDeadListener)
+        Shizuku.addRequestPermissionResultListener(shizukuPermissionResultListener)
         enableEdgeToEdge()
         setContent {
             AppTheme {
@@ -98,7 +110,14 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.refreshShizukuPermission()
+        viewModel.refreshShizukuState()
+    }
+
+    override fun onDestroy() {
+        Shizuku.removeBinderReceivedListener(shizukuBinderReceivedListener)
+        Shizuku.removeBinderDeadListener(shizukuBinderDeadListener)
+        Shizuku.removeRequestPermissionResultListener(shizukuPermissionResultListener)
+        super.onDestroy()
     }
 
     private fun shareDocument(uriString: String, mime: String) {
@@ -142,6 +161,7 @@ private fun MainApp(
     open: (String, String?) -> Unit,
 ) {
     val form by viewModel.form.collectAsState()
+    val shizukuState by viewModel.shizukuState.collectAsState()
     val session by viewModel.session.collectAsState()
     val history by viewModel.history.collectAsState()
     var page by remember { mutableStateOf(AppPage.CONVERTER) }
@@ -189,7 +209,7 @@ private fun MainApp(
                 modifier = Modifier.padding(padding),
                 form = form,
                 session = session,
-                shizukuAvailable = viewModel.isShizukuAvailable(),
+                shizukuAvailable = shizukuState.available,
                 onPickApk = {
                     apkPicker.launch(
                         arrayOf(

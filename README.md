@@ -112,7 +112,9 @@ Studio albo użyć bezpiecznego magazynu poświadczeń CI.
 Tryb pełny zawsze przetwarza całe `appfilter.xml`. Tryb „tylko zainstalowane”
 korzysta najpierw z aktywności widocznych dla `PackageManager`; wynik może być
 niepełny z powodu ograniczeń widoczności pakietów Androida. Shizuku jest
-opcjonalnym, świadomie włączanym rozszerzeniem.
+opcjonalnym, świadomie włączanym rozszerzeniem. Po uruchomieniu usługi Shizuku
+włączenie tej opcji wyświetla prośbę o uprawnienie; aplikacja automatycznie
+odświeża stan po przyznaniu uprawnienia lub ponownym uruchomieniu Shizuku.
 
 ## Format wyniku
 

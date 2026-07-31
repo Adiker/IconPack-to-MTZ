@@ -42,6 +42,7 @@ class ShizukuInstalledAppsProvider(
         )
             .daemon(false)
             .processNameSuffix("installed_apps")
+            .tag("installed_apps")
             .debuggable(false)
             .version(1)
 

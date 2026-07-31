@@ -16,7 +16,7 @@
     <string name="full_mode_hint">Processes every valid appfilter entry. No root or Shizuku required.</string>
     <string name="installed_mode_hint">Android package visibility can make the result incomplete.</string>
     <string name="use_shizuku">Use Shizuku for a complete package list</string>
-    <string name="shizuku_unavailable">Shizuku is unavailable or permission was not granted.</string>
+    <string name="shizuku_unavailable">Shizuku is unavailable. Start its service and return to the app.</string>
     <string name="naming_strategy">Icon naming</string>
     <string name="naming_optimized">Optimized</string>
     <string name="naming_full">Full compatibility</string>
