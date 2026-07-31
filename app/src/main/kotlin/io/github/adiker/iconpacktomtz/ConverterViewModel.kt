@@ -105,6 +105,7 @@ class ConverterViewModel @Inject constructor(
             emptyList(),
         )
     private var analysisJob: Job? = null
+    private var enableShizukuAfterPermissionResult = false
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -167,15 +168,21 @@ class ConverterViewModel @Inject constructor(
     fun updateDescription(value: String) = update { copy(description = value.take(500)) }
     fun updateUseShizuku(value: Boolean) {
         if (!value) {
+            enableShizukuAfterPermissionResult = false
             update { copy(useShizuku = false) }
             return
         }
 
         refreshShizukuState()
-        if (!mutableShizukuState.value.available) return
+        if (!mutableShizukuState.value.available) {
+            enableShizukuAfterPermissionResult = false
+            return
+        }
         if (mutableShizukuState.value.permissionGranted) {
+            enableShizukuAfterPermissionResult = false
             update { copy(useShizuku = true) }
         } else {
+            enableShizukuAfterPermissionResult = true
             shizukuInstalledAppsProvider.requestPermission(
                 ShizukuInstalledAppsProvider.PERMISSION_REQUEST_CODE,
             )
@@ -196,10 +203,13 @@ class ConverterViewModel @Inject constructor(
 
     fun onShizukuPermissionResult(requestCode: Int, grantResult: Int) {
         if (requestCode != ShizukuInstalledAppsProvider.PERMISSION_REQUEST_CODE) return
+        val enableAfterGrant = enableShizukuAfterPermissionResult
+        enableShizukuAfterPermissionResult = false
         refreshShizukuState()
         update {
             copy(
-                useShizuku = grantResult == PackageManager.PERMISSION_GRANTED &&
+                useShizuku = enableAfterGrant &&
+                    grantResult == PackageManager.PERMISSION_GRANTED &&
                     mutableShizukuState.value.permissionGranted,
             )
         }
